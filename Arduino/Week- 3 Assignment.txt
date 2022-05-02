@@ -1,0 +1,60 @@
+#include <EEPROM.h>
+
+int address, data;
+
+void setup() {
+
+Serial.begin(9600);
+
+}
+
+void loop () {
+
+String command= "";
+command= Serial.readString();
+
+if (command.startsWith("read")) {
+
+address = command.substring(5).toInt();
+
+if (address > 1023 || address < 0) {
+
+Serial.println("Addres must be in range from 0 to 1023");
+
+}
+
+else {
+Serial.print("Data value : ");
+Serial.println(EEPROM.read(address), DEC);
+}
+}
+else if (command.startsWith("write")) {
+
+command.remove(0, 6);
+
+int separatorPos = command.indexOf(' ');
+
+address = command.substring(0, separatorPos).toInt();
+
+data = command.substring(separatorPos + 1).toInt();
+
+if (address < 0 || address > 1023 || data < 0 || data > 255) {
+
+Serial.println("Addres must be in range from 0 to 1023 and data from 0 to 255");
+
+}
+
+else {
+byte dataFirst = data & 0XFF;
+
+byte dataSecond = (data >> 8) & 0XFF;
+
+EEPROM.write(address, dataFirst);
+
+EEPROM.write(address + 1, dataSecond);
+
+Serial.println("Done!");
+
+}
+}
+}
